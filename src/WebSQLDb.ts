@@ -33,42 +33,44 @@ export default class WebSQLDb implements MinimongoDb {
           console.log("Database open successful")
           this.db = sqliteDb
           console.log("Checking version")
-          this.db.executeSql(
-            "PRAGMA user_version",
-            [],
-            (rs: any) => {
-              const version = rs.rows.item(0).user_version
-              console.log("Database version :: ", version)
-              if (version === 0) {
-                this.db.transaction((tx: any) => {
-                  tx.executeSql(
-                    `\
-CREATE TABLE docs (
-col TEXT NOT NULL,
-id TEXT NOT NULL,
-state TEXT NOT NULL,
-doc TEXT,
-base TEXT,
-PRIMARY KEY (col, id));`,
-                    [],
-                    doNothing,
-                    (tx: any, err: any) => {
-                      console.log("Version 0 migration failed", JSON.stringify(err))
-                      error(err)
-                    }
-                  )
-                  tx.executeSql("PRAGMA user_version = 2", [], doNothing, (tx: any, err: any) => error(err))
-                  return success(this)
-                })
-              } else {
-                success(this)
+          this.db.readTransaction((rtx: any) => {
+            rtx.executeSql(
+              "PRAGMA user_version",
+              [],
+              (_: any, rs: any) => {
+                const version = rs.rows.item(0).user_version
+                console.log("Database version :: ", version)
+                if (version === 0) {
+                  this.db.transaction((tx: any) => {
+                    tx.executeSql(
+                      `\
+  CREATE TABLE docs (
+  col TEXT NOT NULL,
+  id TEXT NOT NULL,
+  state TEXT NOT NULL,
+  doc TEXT,
+  base TEXT,
+  PRIMARY KEY (col, id));`,
+                      [],
+                      doNothing,
+                      (tx: any, err: any) => {
+                        console.log("Version 0 migration failed", JSON.stringify(err))
+                        error(err)
+                      }
+                    )
+                    tx.executeSql("PRAGMA user_version = 2", [], doNothing, (tx: any, err: any) => error(err))
+                    return success(this)
+                  })
+                } else {
+                  success(this)
+                }
+              },
+              function (err: any) {
+                console.log("version check error :: ", JSON.stringify(err))
+                error(err)
               }
-            },
-            function (err: any) {
-              console.log("version check error :: ", JSON.stringify(err))
-              error(err)
-            }
-          )
+            )
+          })
         },
         function (err: any) {
           console.log("Error opening databse :: ", JSON.stringify(err))

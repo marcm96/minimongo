@@ -2,7 +2,7 @@
 import _ from "lodash"
 
 import async from "async"
-import bowser from "bowser"
+// import bowser from "bowser"
 import { compileDocumentSelector, compileSort } from "./selector"
 import { default as booleanPointInPolygon } from "@turf/boolean-point-in-polygon"
 import { default as intersect } from "@turf/intersect"
@@ -36,7 +36,7 @@ export { compileDocumentSelector }
 // Select appropriate local database, prefering IndexedDb, then WebSQLDb, then LocalStorageDb, then MemoryDb
 export function autoselectLocalDb(options: any, success: any, error: any) {
   // Get browser capabilities
-  const { browser } = bowser
+  const browser = {};
 
   // Browsers with no localStorage support don't deserve anything better than a MemoryDb
   if (!isLocalStorageSupported()) {
