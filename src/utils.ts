@@ -36,7 +36,7 @@ export { compileDocumentSelector }
 // Select appropriate local database, prefering IndexedDb, then WebSQLDb, then LocalStorageDb, then MemoryDb
 export function autoselectLocalDb(options: any, success: any, error: any) {
   // Get browser capabilities
-  const browser = {};
+  const browser = {} as any;
 
   // Browsers with no localStorage support don't deserve anything better than a MemoryDb
   if (!isLocalStorageSupported()) {
